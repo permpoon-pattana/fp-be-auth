@@ -15,7 +15,8 @@ func setSessionStorage() {
 		URL: os.Getenv("REDIS_URL"),
 	})
 	sessStore = session.New(session.Config{
-		Storage: redisStorage,
+		Storage:      redisStorage,
+		CookieDomain: "http://localhost:3000",
 	})
 }
 
