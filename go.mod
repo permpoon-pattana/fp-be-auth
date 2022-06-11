@@ -6,7 +6,7 @@ require (
 	github.com/gofiber/fiber/v2 v2.32.0
 	github.com/gofiber/storage/redis v0.0.0-20220425214350-6420cf28236e
 	github.com/joho/godotenv v1.4.0
-	github.com/permpoon-pattana/authentication v0.0.2
+	github.com/permpoon-pattana/authentication v0.0.3
 )
 
 require (
