@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"log"
+	"os"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -12,15 +14,27 @@ import (
 func main() {
 	godotenv.Load()
 	store := getSessionStore()
+
 	auth, err := authentication.NewAuthenticator()
 	if err != nil {
 		log.Panic(err)
 	}
+
+	port := fmt.Sprintf(":%v", os.Getenv("PORT"))
 	app := fiber.New()
 	app.Use(cors.New(cors.Config{
-		AllowOrigins:     "http://localhost:3000",
+		AllowOrigins:     os.Getenv("CORS_ORIGINS"),
 		AllowCredentials: true,
 	}))
+
+	app.Get("/", func(c *fiber.Ctx) error {
+		redirectURL := os.Getenv("LOGIN_SUCCESS_REDIRECT_URL")
+		if redirectURL == "" {
+			redirectURL = DefaultRedirectURL
+		}
+
+		return c.Redirect(redirectURL)
+	})
 	app.Get("/login", authentication.LoginHandler(&authentication.LoginParams{
 		Auth:  auth,
 		Store: store,
@@ -29,16 +43,13 @@ func main() {
 		Auth:  auth,
 		Store: store,
 	}))
-	app.Get("/", func(c *fiber.Ctx) error {
-		return c.Redirect("http://localhost:3000")
-	})
 	app.Get("/info", func(c *fiber.Ctx) error {
 		sess, _ := sessStore.Get(c)
 		sub := sess.Get(authentication.SESSION_HEADER_SUBJECT)
 		return c.JSON(fiber.Map{
-			"sub": sub,
+			SubjectKey: sub,
 		})
 	})
-	// app.Listen(os.Getenv("PORT"))
-	app.Listen(":5000")
+
+	app.Listen(port)
 }
